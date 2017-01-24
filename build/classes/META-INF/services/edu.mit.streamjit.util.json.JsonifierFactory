@@ -1,0 +1,13 @@
+edu.mit.streamjit.util.json.PrimitiveJsonifierFactory # -2147483648
+edu.mit.streamjit.util.json.ArrayJsonifierFactory # -2147483647
+edu.mit.streamjit.impl.common.Configuration$ConfigurationJsonifier # 0
+edu.mit.streamjit.impl.common.Configuration$IntParameter$IntParameterJsonifier # 0
+edu.mit.streamjit.impl.common.Configuration$FloatParameter$FloatParameterJsonifier # 0
+edu.mit.streamjit.impl.common.Configuration$SwitchParameter$SwitchParameterJsonifier # 0
+edu.mit.streamjit.impl.common.Configuration$PermutationParameter$PermutationParameterJsonifier # 0
+edu.mit.streamjit.impl.common.Configuration$PartitionParameter$BlobSpecifier$BlobSpecifierJsonifier # 0
+edu.mit.streamjit.impl.common.Configuration$PartitionParameter$PartitionParameterJsonifier # 0
+edu.mit.streamjit.impl.common.Configuration$CompositionParameter$CompositionParameterJsonifier # 0
+edu.mit.streamjit.util.json.StatelessJsonifierFactory # 2147483645
+edu.mit.streamjit.util.json.ToStringJsonifierFactory # 2147483646
+edu.mit.streamjit.util.json.SerializableJsonifierFactory # 2147483647
