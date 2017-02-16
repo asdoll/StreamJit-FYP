@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="lib/joptsimple.jar"/>
 	<classpathentry kind="lib" path="lib/ServiceProviderProcessor.jar"/>
 	<classpathentry kind="lib" path="lib/sqlitejdbc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ludeq/workspace/test/build/hbc-core-2.2.0.jar" sourcepath="C:/Users/ludeq/.m2/repository/com/twitter/hbc-core/2.2.0/hbc-core-2.2.0-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ludeq/workspace/test/build/twitter4j.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

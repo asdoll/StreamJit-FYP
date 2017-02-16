@@ -23,16 +23,16 @@ public class test {
 	public static void main(String[] args) throws InterruptedException {
 		// Benchmarker.runBenchmarks(new FMRadioBenchmarkProvider(), new DebugStreamCompiler()).get(0).print(System.out);
 		StreamCompiler sc = new Compiler2StreamCompiler();
-		OneToOneElement<Float, Float> fmradio = new TestPipeline();
+		OneToOneElement<String, String> fmradio = new Example1();
 		
 		Path path = Paths.get("data/fmradio.in");
-		Input<Float> input = Input.fromBinaryFile(path, Float.class, ByteOrder.LITTLE_ENDIAN);
+		Input<String> input = Input.fromBinaryFile(path, String.class, ByteOrder.LITTLE_ENDIAN);
 		input = Datasets.nCopies(1, input);
-		
+		System.out.print(input);
 		CompiledStream cs = sc.compile(fmradio, input, Output.toPrintStream(System.out));
 		cs.awaitDrained();
 	}
-	private static final class Example1 extends Filter<Float, Float> {
+	private static final class Example1 extends Filter<String, String> {
 
 		public Example1() {
 			super(1, 1);
@@ -42,8 +42,8 @@ public class test {
 		@Override
 		public void work() {
 			
-			float a = pop();
-			float b = a *2;
+			String a = pop();
+			String b = a.toLowerCase();
 			push(b);
 		
 		}
