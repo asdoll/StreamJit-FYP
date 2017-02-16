@@ -32,7 +32,6 @@ public class TwitterConnection {
 		@Override
 		public void onException(Exception arg0) {
 			arg0.printStackTrace();
-			
 		}
 
 		@Override
