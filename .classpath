@@ -2,16 +2,18 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="build/jar/streamjit.jar"/>
 	<classpathentry kind="lib" path="lib/asm.jar"/>
 	<classpathentry kind="lib" path="lib/bridj.jar"/>
-	<classpathentry kind="lib" path="lib/bytecodelib.jar"/>
+	<classpathentry kind="lib" path="lib/bytecodelib.jar" sourcepath="/streamjit-master/src/edu"/>
 	<classpathentry kind="lib" path="lib/guava.jar"/>
 	<classpathentry kind="lib" path="lib/javax.json.jar"/>
 	<classpathentry kind="lib" path="lib/joptsimple.jar"/>
 	<classpathentry kind="lib" path="lib/ServiceProviderProcessor.jar"/>
 	<classpathentry kind="lib" path="lib/sqlitejdbc.jar"/>
 	<classpathentry kind="lib" path="C:/Users/ludeq/workspace/test/build/hbc-core-2.2.0.jar" sourcepath="C:/Users/ludeq/.m2/repository/com/twitter/hbc-core/2.2.0/hbc-core-2.2.0-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/ludeq/workspace/test/build/twitter4j.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ludeq/Documents/GitHub/StreamJit-FYP/lib/twitter4j-core-4.0.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ludeq/Documents/GitHub/StreamJit-FYP/lib/httpclient-4.0.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ludeq/Documents/GitHub/StreamJit-FYP/lib/jackson-all-1.9.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ludeq/Documents/GitHub/StreamJit-FYP/lib/streamjit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
