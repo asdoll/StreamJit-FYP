@@ -36,6 +36,7 @@ import edu.mit.streamjit.api.Output;
 import edu.mit.streamjit.api.Pipeline;
 import edu.mit.streamjit.api.Rate;
 import edu.mit.streamjit.api.RoundrobinJoiner;
+import edu.mit.streamjit.api.RoundrobinSplitter;
 import edu.mit.streamjit.api.Splitjoin;
 import edu.mit.streamjit.api.StatefulFilter;
 import edu.mit.streamjit.api.StreamCompiler;
@@ -50,7 +51,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -77,34 +80,107 @@ public final class test {
 		cs.awaitDrained();
 	}
 	
+	
+	private static final class TestPipeline extends Pipeline<String, Integer> {
+		private TestPipeline() {
+			add(new Example1());
+			add(new Example2());
+//			Splitjoin<Integer, Integer> sj = new Splitjoin<Integer,Integer>(new RoundrobinSplitter<Integer>(), new RoundrobinJoiner<Integer>());
+//			sj.add(new Example3());
+//			sj.add(new Example4());
+//			add(sj);
+		}
+	}
+	
 	private static final class Example1 extends Filter<String, Integer> {
 
 		public Example1() {
-			super(Rate.create(1),Rate.create(1),Rate.create(0));
+			super(Rate.create(0,50),Rate.create(0,51),Rate.create(0));
+			
+		}
+
+		@Override
+		public void work() {
+			Random a=new Random();
+			for(int i=0;i<50;i++){
+				if(a.nextFloat()<0.5){
+					int t = Integer.parseInt(pop());
+					if(a.nextFloat()<0.2){
+						push(t);
+					}
+				}
+			}
+			if(a.nextFloat()<0.5){
+				push(51);
+			}
+		}
+		
+	}
+	private static final class Example2 extends Filter<Integer, Integer> {
+		private Example2() {
+			super(Rate.create(0,50),Rate.create(0,51),Rate.create(0));
+		}
+
+		@Override
+		public void work() {
+			Random a=new Random();
+			for(int i=0;i<50;i++){
+				if(a.nextFloat()<0.3){
+					int t = pop();
+					if(a.nextFloat()<0.5){
+						push(t+1);
+					}
+				}
+			}
+			push(61);
+		}
+	}
+	private static final class Example3 extends Filter<Integer, Integer> {
+
+		public Example3() {
+			super(Rate.create(0,20),Rate.create(0,31),Rate.create(0));
 			
 		}
 
 		@Override
 		public void work() {		
-			push(Integer.valueOf(pop()));
-		
+			Random a=new Random();
+			a.setSeed(new Date().getTime());
+			for(int i=0;i<20;i++){
+				if(a.nextFloat()>0.5){
+					int t = pop();
+					push(t);
+				}
+					push(i);
+			}
+			push(71);
 		}
 		
 	}
-	private static final class TestPipeline extends Pipeline<String, Integer> {
-		private TestPipeline() {
-			add(new Example1());
-			add(new Example2());
-	}
-	private static final class Example2 extends Filter<Integer, Integer> {
-		private Example2() {
-			super(Rate.create(1),Rate.create(1),Rate.create(0));
+			
+	private static final class Example4 extends Filter<Integer, Integer> {
+
+		public Example4() {
+			super(Rate.create(0,30),Rate.create(0,61),Rate.create(0));
+			
 		}
 
 		@Override
-		public void work() {
-			push(pop()+1);
+		public void work() {		
+			Random a=new Random();
+			a.setSeed(new Date().getTime());
+			for(int i=0;i<30;i++){
+				if(a.nextFloat()>0.5){
+					int t = pop();
+					if(a.nextFloat()>0.5){
+						push(t);
+						push(t+1);
+					}
+				}
+			}
+			push(81);
 		}
-	}
-	}
+		
+	}	
+	
 }
