@@ -95,7 +95,7 @@ public final class test {
 	private static final class Example1 extends Filter<String, Integer> {
 
 		public Example1() {
-			super(Rate.create(0,50),Rate.create(0,51),Rate.create(0));
+			super(Rate.create(50),Rate.create(50),Rate.create(0));
 			
 		}
 
@@ -118,7 +118,7 @@ public final class test {
 	}
 	private static final class Example2 extends Filter<Integer, Integer> {
 		private Example2() {
-			super(Rate.create(0,50),Rate.create(0,51),Rate.create(0));
+			super(Rate.create(50),Rate.create(50),Rate.create(0));
 		}
 
 		@Override
