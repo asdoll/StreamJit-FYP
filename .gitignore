@@ -25,4 +25,4 @@ venv/
 *.db
 # StreamJit's configuration file
 *.cfg
-
+*.class
