@@ -950,7 +950,134 @@ public class Compiler2 {
 		}
 	}
 
+	private void createSteadyStateCode() {
+		for (Actor a : actors) {
+			for (int i = 0; i < a.outputs().size(); ++i) {
+				Storage s = a.outputs().get(i);
+				
+				if (s.isInternal()) continue;
+				int itemsWritten = a.push(i).max() * initSchedule.get(a.group()) * a.group().schedule().get(a);
+				a.outputIndexFunctions().set(i, a.outputIndexFunctions().get(i).compose(new AdditionIndexFunction(itemsWritten)));
+			}
+			for (int i = 0; i < a.inputs().size(); ++i) {
+				
+				Storage s = a.inputs().get(i);
+				if (s.isInternal()) continue;
+				
+				int itemsRead = a.pop(i).max() * initSchedule.get(a.group()) * a.group().schedule().get(a);
+				a.inputIndexFunctions().set(i, a.inputIndexFunctions().get(i).compose(new AdditionIndexFunction(itemsRead)));
+			}
+		}
 
+		for (Storage s : storage)
+			s.computeSteadyStateRequirements(externalSchedule);
+		this.steadyStateStorage = createStorage(false, new PeekPokeStorageFactory(EXTERNAL_STORAGE_STRATEGY.asFactory(config)));
+		
+		ImmutableMap<Storage, ConcreteStorage> internalStorage = createStorage(true, INTERNAL_STORAGE_STRATEGY.asFactory(config));
+
+		List<Core> ssCores = new ArrayList<>(maxNumCores);
+		
+		IndexFunctionTransformer ift = new IdentityIndexFunctionTransformer();
+		for (int i = 0; i < maxNumCores; ++i) {
+			
+			ImmutableTable.Builder<Actor, Integer, IndexFunctionTransformer> inputTransformers = ImmutableTable.builder(),
+					outputTransformers = ImmutableTable.builder();
+			for (Actor a : Iterables.filter(actors, WorkerActor.class)) {
+				for (int j = 0; j < a.inputs().size(); ++j) {
+					inputTransformers.put(a, j, ift);
+				}
+				
+				
+				for (int j = 0; j < a.outputs().size(); ++j) {
+					outputTransformers.put(a, j, ift);
+				}
+			}
+
+			ImmutableMap.Builder<ActorGroup, Integer> unrollFactors = ImmutableMap.builder();
+			for (ActorGroup g : groups) {
+				if (g.isTokenGroup()) continue;
+				
+				IntParameter param = config.getParameter(String.format("UnrollCore%dGroup%d", i, g.id()), IntParameter.class);
+				unrollFactors.put(g, param.getValue());
+			}
+
+			ssCores.add(new Core(CollectionUtils.union(steadyStateStorage, internalStorage), (table, wa) -> SWITCHING_STRATEGY.createSwitch(table, wa, config), unrollFactors.build(), inputTransformers.build(), outputTransformers.build()));
+		}
+
+		int throughputPerSteadyState = 0;
+		for (ActorGroup g : groups)
+			if (!g.isTokenGroup())
+				ALLOCATION_STRATEGY.allocateGroup(g, Range.closedOpen(0, externalSchedule.get(g)), ssCores, config);
+			else {
+				assert g.actors().size() == 1;
+				TokenActor ta = (TokenActor)g.actors().iterator().next();
+				assert g.schedule().get(ta) == 1;
+				ConcreteStorage storage = steadyStateStorage.get(Iterables.getOnlyElement(ta.isInput() ? g.outputs() : g.inputs()));
+				int executions = externalSchedule.get(g);
+				if (ta.isInput())
+					readInstructions.add(makeReadInstruction(ta, storage, executions));
+				else {
+					writeInstructions.add(makeWriteInstruction(ta, storage, executions));
+					throughputPerSteadyState += executions;
+				}
+			}
+		ImmutableList.Builder<MethodHandle> steadyStateCodeBuilder = ImmutableList.builder();
+		for (Core c : ssCores)
+			if (!c.isEmpty())
+				steadyStateCodeBuilder.add(c.code());
+		//Provide at least one core of code, even if it doesn't do anything; the
+		//blob host will still copy inputs to outputs.
+		this.steadyStateCode = steadyStateCodeBuilder.build();
+		if (steadyStateCode.isEmpty())
+			this.steadyStateCode = ImmutableList.of(Combinators.nop());
+
+		createMigrationInstructions();
+		createDrainInstructions();
+
+		Boolean reportThroughput = (Boolean)config.getExtraData("reportThroughput");
+		if (reportThroughput != null && reportThroughput) {
+			ReportThroughputInstruction rti = new ReportThroughputInstruction(throughputPerSteadyState);
+			readInstructions.add(rti);
+			writeInstructions.add(rti);
+		}
+	}
+
+	private ReadInstruction makeReadInstruction(TokenActor a, ConcreteStorage cs, int count) {
+		assert a.isInput();
+		Storage s = Iterables.getOnlyElement(a.outputs());
+		IndexFunction idxFxn = Iterables.getOnlyElement(a.outputIndexFunctions());
+		ReadInstruction retval;
+		if (count == 0)
+			retval = new NopReadInstruction(a.token());
+		else if (cs instanceof PeekableBufferConcreteStorage)
+			retval = new PeekReadInstruction(a, count);
+		else if (s.type().isPrimitive() != true &&
+				cs instanceof BulkWritableConcreteStorage &&
+				contiguouslyIncreasing(idxFxn, 0, count)) {
+			retval = new BulkReadInstruction(a, (BulkWritableConcreteStorage)cs, count);
+		} else
+			retval = new TokenReadInstruction(a, cs, count);
+		retval.init(precreatedBuffers);
+		return retval;
+	}
+
+	private WriteInstruction makeWriteInstruction(TokenActor a, ConcreteStorage cs, int count) {
+		assert a.isOutput();
+		Storage s = Iterables.getOnlyElement(a.inputs());
+		IndexFunction idxFxn = Iterables.getOnlyElement(a.inputIndexFunctions());
+		WriteInstruction retval;
+		if (count == 0)
+			retval = new NopWriteInstruction(a.token());
+		else if (!s.type().isPrimitive() &&
+				cs instanceof BulkReadableConcreteStorage &&
+				contiguouslyIncreasing(idxFxn, 0, count)) {
+			retval = new BulkWriteInstruction(a, (BulkReadableConcreteStorage)cs, count);
+		} else
+			retval = new TokenWriteInstruction(a, cs, count);
+//		System.out.println("Made a "+retval+" for "+a.token());
+		retval.init(precreatedBuffers);
+		return retval;
+	}
 
 	private boolean contiguouslyIncreasing(IndexFunction idxFxn, int start, int count) {
 		try {
