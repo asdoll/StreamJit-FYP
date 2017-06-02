@@ -996,9 +996,9 @@ public class Compiler2 {
 			ImmutableMap.Builder<ActorGroup, Integer> unrollFactors = ImmutableMap.builder();
 			for (ActorGroup g : groups) {
 				if (g.isTokenGroup()) continue;
+				////to be continued
+				////
 				
-				IntParameter param = config.getParameter(String.format("UnrollCore%dGroup%d", i, g.id()), IntParameter.class);
-				unrollFactors.put(g, param.getValue());
 			}
 
 			ssCores.add(new Core(CollectionUtils.union(steadyStateStorage, internalStorage), (table, wa) -> SWITCHING_STRATEGY.createSwitch(table, wa, config), unrollFactors.build(), inputTransformers.build(), outputTransformers.build()));
@@ -1074,7 +1074,6 @@ public class Compiler2 {
 			retval = new BulkWriteInstruction(a, (BulkReadableConcreteStorage)cs, count);
 		} else
 			retval = new TokenWriteInstruction(a, cs, count);
-//		System.out.println("Made a "+retval+" for "+a.token());
 		retval.init(precreatedBuffers);
 		return retval;
 	}
