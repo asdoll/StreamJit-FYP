@@ -10,6 +10,6 @@
 	<classpathentry kind="lib" path="lib/joptsimple.jar"/>
 	<classpathentry kind="lib" path="lib/ServiceProviderProcessor.jar"/>
 	<classpathentry kind="lib" path="lib/sqlitejdbc.jar"/>
-	<classpathentry kind="lib" path="C:/Users/ludeq/Documents/GitHub/StreamJit-FYP/lib/jackson-all-1.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/ludeq/Documents/Github/StreamJit-FYP/lib/jackson-all-1.9.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
