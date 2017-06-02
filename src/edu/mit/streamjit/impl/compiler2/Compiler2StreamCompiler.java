@@ -119,7 +119,6 @@ public final class Compiler2StreamCompiler extends BlobHostStreamCompiler {
 
 	@Override
 	protected Blob makeBlob(ImmutableSet<Worker<?, ?>> workers, Configuration configuration, Input<?> input, Output<?> output) {
-		//When reporting throughput, repeat the input as needed.
 		Boolean reportThroughput = (Boolean)configuration.getExtraData("reportThroughput");
 		if (reportThroughput != null && reportThroughput)
 			input = Datasets.cycle(input);
@@ -128,12 +127,12 @@ public final class Compiler2StreamCompiler extends BlobHostStreamCompiler {
 
 	@Override
 	protected Buffer makeInputBuffer(Input<?> input, int minCapacity) {
-		return null; //handled by Compiler2
+		return null; 
 	}
 
 	@Override
 	protected Buffer makeOutputBuffer(Output<?> output, int minCapacity) {
-		return null; //handled by Compiler2
+		return null; 
 	}
 
 	@Override
